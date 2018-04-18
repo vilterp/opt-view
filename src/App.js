@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import classNames from "classnames";
 import './App.css';
 
 const exampleMemo = {
@@ -14,13 +15,14 @@ const exampleMemo = {
   ],
 };
 
-function extractTree(memo, rootID) {
+function extractTree(memo, groupID) {
   // TODO: uh yeah this is an array
   // which one do we show
-  const rootNode = memo[rootID][0];
+  const exprs = memo[groupID];
+  const chosenExpr = exprs[0];
   return {
-    op: rootNode.op,
-    children: rootNode.args.map((arg) => {
+    op: chosenExpr.op,
+    children: chosenExpr.args.map((arg) => {
       if (typeof arg === "number") {
         return extractTree(memo, arg);
       } else {
@@ -65,12 +67,38 @@ class ExprView extends Component {
 }
 
 class MemoView extends Component {
-  handleHighlightGroup = (groupID) => {
-    this.props.onHighlightGroup(groupID);
+  handleSetSelectedGroup = (groupID) => {
+    this.props.onSetSelectedGroup(groupID);
   }
 
-  handleUnHighlightGroup = () => {
-    this.props.onUnHighlightGroup();
+  renderGroup(id, group, selectedGroupID) {
+    const isSelected = id === selectedGroupID;
+    const onClick = () => isSelected
+      ? this.handleSetSelectedGroup(null)
+      : this.handleSetSelectedGroup(id);
+
+    return (
+      <tr key={id}>
+        <td
+          className={classNames(
+            "memo-view__group-id",
+            { "memo-view__group-id--selected": isSelected },
+          )}
+          onClick={onClick}
+        >
+          {id}
+        </td>
+        <td className="group-view">
+          <ul>
+            {group.map((expr, idx) => (
+              <li key={idx}>
+                <ExprView expr={expr} />
+              </li>
+            ))}
+          </ul>
+        </td>
+      </tr>
+    );
   }
 
   render() {
@@ -84,24 +112,7 @@ class MemoView extends Component {
         </thead>
         <tbody>
           {Object.entries(this.props.memo).map(([id, group]) => (
-            <tr key={id}>
-              <td
-                className="memo-view__group-id"
-                onMouseOver={() => this.handleHighlightGroup(id)}
-                onMouseOut={() => this.handleUnHighlightGroup()}
-              >
-                {id}
-              </td>
-              <td className="group-view">
-                <ul>
-                  {group.map((expr, idx) => (
-                    <li key={idx}>
-                      <ExprView expr={expr} />
-                    </li>
-                  ))}
-                </ul>
-              </td>
-            </tr>
+            this.renderGroup(id, group, this.props.selectedGroup)
           ))}
         </tbody>
       </table>
@@ -113,19 +124,13 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      highlightedGroup: null,
+      selectedGroup: null,
     };
   }
 
-  handleHighlightGroup = (groupID) => {
+  handleSetSelectedGroup = (groupID) => {
     this.setState({
-      highlightedGroup: groupID,
-    });
-  }
-
-  handleUnHighlightGroup = () => {
-    this.setState({
-      highlightedGroup: null,
+      selectedGroup: groupID,
     });
   }
 
@@ -133,14 +138,30 @@ class App extends Component {
     return (
       <div>
         <h1>Opt View</h1>
-        <MemoView
-          memo={exampleMemo}
-          onHighlightGroup={this.handleHighlightGroup}
-          onUnHighlightGroup={this.handleUnHighlightGroup}
-        />
-        {this.state.highlightedGroup
-          ? <ExprTreeView node={extractTree(exampleMemo, this.state.highlightedGroup)} />
-          : null}
+        <table>
+          <thead>
+            <tr>
+              <th>Memo</th>
+              <th>Selected Expr</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{verticalAlign: "top"}}>
+              <td>
+                <MemoView
+                  memo={exampleMemo}
+                  selectedGroup={this.state.selectedGroup}
+                  onSetSelectedGroup={this.handleSetSelectedGroup}
+                />
+              </td>
+              <td style={{ minWidth: 500, paddingLeft: 50 }}>
+                {this.state.selectedGroup
+                  ? <ExprTreeView node={extractTree(exampleMemo, this.state.selectedGroup)} />
+                  : null}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }

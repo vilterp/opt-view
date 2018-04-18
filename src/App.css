@@ -8,6 +8,11 @@
   color: blue;
 }
 
+.memo-view__group-id--selected {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
 .memo-view thead {
   border-bottom: 2px solid black;
 }
