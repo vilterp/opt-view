@@ -143,7 +143,7 @@ class MemoView extends Component {
   }
 }
 
-class App extends Component {
+class MemoAndExprView extends Component {
   constructor() {
     super();
     this.state = {
@@ -159,35 +159,85 @@ class App extends Component {
 
   render() {
     return (
+      <table>
+        <thead>
+          <tr>
+            <th>Memo</th>
+            <th>Selected Expr</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style={{verticalAlign: "top"}}>
+            <td>
+              <MemoView
+                memo={this.props.memo}
+                selectedGroupID={this.state.selectedGroupID}
+                onSetSelectedGroup={this.handleSetSelectedGroup}
+              />
+            </td>
+            <td style={{ minWidth: 500, paddingLeft: 50 }}>
+              {this.state.selectedGroupID
+                ? <ExprTreeView
+                  memo={this.props.memo}
+                  groupID={this.state.selectedGroupID}
+                />
+                : null}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
+}
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      memo: exampleMemo,
+      inputText: JSON.stringify(exampleMemo, null, 2),
+    };
+  }
+
+  handleChangeInputText(newText) {
+    this.setState({
+      inputText: newText,
+      parseErr: null,
+    });
+  }
+
+  handleLoad() {
+    try {
+      const parsed = JSON.parse(this.state.inputText);
+      this.setState({
+        memo: parsed,
+      });
+    } catch (e) {
+      this.setState({
+        err: e,
+      });
+    }
+  }
+
+  render() {
+    return (
       <div>
         <h1>Opt View</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>Memo</th>
-              <th>Selected Expr</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{verticalAlign: "top"}}>
-              <td>
-                <MemoView
-                  memo={exampleMemo}
-                  selectedGroupID={this.state.selectedGroupID}
-                  onSetSelectedGroup={this.handleSetSelectedGroup}
-                />
-              </td>
-              <td style={{ minWidth: 500, paddingLeft: 50 }}>
-                {this.state.selectedGroupID
-                  ? <ExprTreeView
-                      memo={exampleMemo}
-                      groupID={this.state.selectedGroupID}
-                    />
-                  : null}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <MemoAndExprView memo={this.state.memo} />
+        <div style={{paddingTop: 50}}>
+          <h3>Input</h3>
+          <textarea
+            className="memo-input"
+            placeholder="paste here"
+            rows="30"
+            cols="60"
+            value={this.state.inputText}
+            onChange={(evt) => this.handleChangeInputText(evt.target.value)}
+          />
+          <br />
+          <button onClick={() => this.handleLoad()}>Load</button>
+          {this.state.err ? <pre>Parse error: {this.state.err.toString()}</pre> : null}
+        </div>
       </div>
     );
   }

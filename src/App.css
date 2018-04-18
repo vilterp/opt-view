@@ -1,3 +1,7 @@
+.memo-input {
+  font-family: monospace;
+}
+
 .memo-view {
   border-collapse: collapse;
 }
