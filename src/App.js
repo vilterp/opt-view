@@ -56,6 +56,14 @@ class ExprTreeView extends Component {
     )
   }
 
+  componentWillReceiveProps(props) {
+    // clamp the exprIdx to within the bounds of the group, in case this component
+    // is passed a new memo to render.
+    this.setState({
+      exprIdx: clamp(this.state.exprIdx, 0, props.memo[props.groupID].length - 1),
+    });
+  }
+
   render() {
     const exprs = this.props.memo[this.props.groupID];
     const chosenExpr = exprs[this.state.exprIdx];
@@ -65,7 +73,7 @@ class ExprTreeView extends Component {
         {chosenExpr.op} {this.renderChooser(exprs)}
         <ul>
           {chosenExpr.args.map((child) => (
-            <li>
+            <li key={JSON.stringify(child)}>
               {/* TODO: distinguish more robustly between tables and group ids */}
               {typeof child === "string"
                 ? <span>{child}</span>
