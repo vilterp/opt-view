@@ -24,9 +24,9 @@ class ExprTreeView extends Component {
   }
 
   handleChangeExprIdx(delta) {
-    // TODO: clamp to valid range
+    const exprs = this.props.memo[this.props.groupID];
     this.setState({
-      exprIdx: this.state.exprIdx + delta,
+      exprIdx: clamp(this.state.exprIdx + delta, 0, exprs.length-1),
     });
   }
 
@@ -144,10 +144,10 @@ class MemoView extends Component {
 }
 
 class MemoAndExprView extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      selectedGroupID: null,
+      selectedGroupID: Object.keys(props.memo).sort()[0],
     };
   }
 
@@ -178,9 +178,9 @@ class MemoAndExprView extends Component {
             <td style={{ minWidth: 500, paddingLeft: 50 }}>
               {this.state.selectedGroupID
                 ? <ExprTreeView
-                  memo={this.props.memo}
-                  groupID={this.state.selectedGroupID}
-                />
+                    memo={this.props.memo}
+                    groupID={this.state.selectedGroupID}
+                  />
                 : null}
             </td>
           </tr>
@@ -241,6 +241,11 @@ class App extends Component {
       </div>
     );
   }
+}
+
+function clamp(val, min, max) {
+  const withinMax = Math.min(val, max);
+  return Math.max(min, withinMax);
 }
 
 export default App;
