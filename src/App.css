@@ -39,3 +39,16 @@
   margin: 0;
   padding-left: 17px;
 }
+
+.expr-chooser {
+  font-style: italic;
+}
+
+.expr-chooser__button {
+  cursor: pointer;
+}
+
+.expr-chooser__button--enabled {
+  color: blue;
+  font-weight: bold;
+}

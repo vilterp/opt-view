@@ -15,38 +15,61 @@ const exampleMemo = {
   ],
 };
 
-function extractTree(memo, groupID) {
-  // TODO: uh yeah this is an array
-  // which one do we show
-  const exprs = memo[groupID];
-  const chosenExpr = exprs[0];
-  return {
-    op: chosenExpr.op,
-    children: chosenExpr.args.map((arg) => {
-      if (typeof arg === "number") {
-        return extractTree(memo, arg);
-      } else {
-        return {
-          table: arg
-        };
-      }
-    })
-  }
-}
-
 class ExprTreeView extends Component {
-  render() {
-    const node = this.props.node;
-    if (node.table) {
-      return <span>{node.table}</span>
+  constructor() {
+    super();
+    this.state = {
+      exprIdx: 0,
+    };
+  }
+
+  handleChangeExprIdx(delta) {
+    // TODO: clamp to valid range
+    this.setState({
+      exprIdx: this.state.exprIdx + delta,
+    });
+  }
+
+  renderChooser(exprs) {
+    if (exprs.length === 1) {
+      return null;
     }
+
+    return (
+      <span className="expr-chooser">
+        (
+        <span
+          className={classNames("expr-chooser__button", {"expr-chooser__button--enabled": this.state.exprIdx > 0})}
+          onClick={() => this.handleChangeExprIdx(-1)}
+        >
+          &lt;
+        </span>
+        {this.state.exprIdx + 1}/{exprs.length}
+        <span
+          className={classNames("expr-chooser__button", {"expr-chooser__button--enabled": this.state.exprIdx < exprs.length-1})}
+          onClick={() => this.handleChangeExprIdx(1)}
+        >
+          &gt;
+        </span>
+        )
+      </span>
+    )
+  }
+
+  render() {
+    const exprs = this.props.memo[this.props.groupID];
+    const chosenExpr = exprs[this.state.exprIdx];
+
     return (
       <div className="expr-tree-view">
-        {node.op}
+        {chosenExpr.op} {this.renderChooser(exprs)}
         <ul>
-          {node.children.map((child) => (
+          {chosenExpr.args.map((child) => (
             <li>
-              <ExprTreeView node={child} />
+              {/* TODO: distinguish more robustly between tables and group ids */}
+              {typeof child === "string"
+                ? <span>{child}</span>
+                : <ExprTreeView memo={this.props.memo} groupID={child} />}
             </li>
           ))}
         </ul>
@@ -112,7 +135,7 @@ class MemoView extends Component {
         </thead>
         <tbody>
           {Object.entries(this.props.memo).map(([id, group]) => (
-            this.renderGroup(id, group, this.props.selectedGroup)
+            this.renderGroup(id, group, this.props.selectedGroupID)
           ))}
         </tbody>
       </table>
@@ -124,13 +147,13 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      selectedGroup: null,
+      selectedGroupID: null,
     };
   }
 
   handleSetSelectedGroup = (groupID) => {
     this.setState({
-      selectedGroup: groupID,
+      selectedGroupID: groupID,
     });
   }
 
@@ -150,13 +173,16 @@ class App extends Component {
               <td>
                 <MemoView
                   memo={exampleMemo}
-                  selectedGroup={this.state.selectedGroup}
+                  selectedGroupID={this.state.selectedGroupID}
                   onSetSelectedGroup={this.handleSetSelectedGroup}
                 />
               </td>
               <td style={{ minWidth: 500, paddingLeft: 50 }}>
-                {this.state.selectedGroup
-                  ? <ExprTreeView node={extractTree(exampleMemo, this.state.selectedGroup)} />
+                {this.state.selectedGroupID
+                  ? <ExprTreeView
+                      memo={exampleMemo}
+                      groupID={this.state.selectedGroupID}
+                    />
                   : null}
               </td>
             </tr>
