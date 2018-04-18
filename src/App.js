@@ -109,7 +109,7 @@ class MemoView extends Component {
           )}
           onClick={onClick}
         >
-          {id}
+          {isSelected ? `(${id})` : id}
         </td>
         <td className="group-view">
           <ul>
@@ -163,7 +163,7 @@ class MemoAndExprView extends Component {
         <thead>
           <tr>
             <th>Memo</th>
-            <th>Selected Expr</th>
+            <th>Selected Group</th>
           </tr>
         </thead>
         <tbody>
