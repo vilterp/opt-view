@@ -1,0 +1,36 @@
+.memo-view {
+  border-collapse: collapse;
+}
+
+.memo-view__group-id {
+  font-family: monospace;
+  cursor: pointer;
+  color: blue;
+}
+
+.memo-view thead {
+  border-bottom: 2px solid black;
+}
+
+.memo-view tbody tr {
+  border-top: 1px solid grey;
+}
+
+.group-view ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.expr-view {
+  margin: 0;
+}
+
+
+.expr-tree-view {
+  font-family: monospace;
+}
+
+.expr-tree-view ul {
+  margin: 0;
+  padding-left: 17px;
+}
