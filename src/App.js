@@ -129,7 +129,7 @@ class MemoView extends Component {
       <table className="memo-view">
         <thead>
           <tr>
-            <th>Group ID</th>
+            <th>ID</th>
             <th>Group</th>
           </tr>
         </thead>
